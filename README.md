@@ -62,3 +62,47 @@ Exemplo de comando
 ```bash
 aws lambda update-function-code --function-name firstFunction --zip-file fileb://lambda.zip
 ```
+
+
+### Usando Action para da deploy da lambda na Aws
+
+Antes de adiciona a `action`, precisa configura as `secrets` da aws, para isso, dentro do repositorio no github,
+clique e settings e em `Secrets and variables`, depois em `action` e em `New repository secret`, adicionando 3 secrets:
+
+- AWS_ACCESS_KEY_ID
+- AWS_REGION
+- AWS_SECRET_ACCESS_KEY
+
+Como mostra as images<br>
+![images/action1.png](images/action1.png)
+<br>
+Como mostra a image
+![images/action2.png](images/action2.png)
+
+
+Depois de configura as secrets da aws, crie a action, pode ser usado o modelo padrão que se encontra no marketplace do github,
+fazendo as alterações necessarias para sua action, seguindo o exemplo abaixo
+
+```
+name: deploy to lambda
+on: [push]
+jobs:
+
+  deploy_zip:
+    name: deploy lambda function
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v3
+      - name: Generate zip
+        run: |
+          zip lambda.zip *.py  
+      - name: default deploy
+        uses: appleboy/lambda-action@v0.2.0
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          function_name: firstFunction
+          zip_file: lambda.zip
+```
